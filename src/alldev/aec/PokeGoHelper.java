@@ -25,8 +25,9 @@ public class PokeGoHelper implements Runnable {
 	private static boolean isAuthenticated = false;
 
 	static String gymNameAEC = "Ars Electronica Center";
-	static int refreshTime = 20000;
+	static int refreshTime = 2000;
 	static AECInfoListener listener;
+	private Gym aec;
 
 	static public void main(String[] args) {
 		new ListenTest();
@@ -44,14 +45,19 @@ public class PokeGoHelper implements Runnable {
 	}
 
 	public void run() {
-		if (!isAuthenticated)
-			try {
+		try {
+			if (!isAuthenticated)
 				login();
-			} catch (LoginFailedException | RemoteServerException | IOException e) {
-				e.printStackTrace();
-			}
+			getAECGym();
+			if (aec != null)
+				broadcastInfo(getInfoFromGym(aec));
+		} catch (LoginFailedException | RemoteServerException | IOException
+				| InterruptedException e) {
+			AECInfo i = new AECInfo();
+			i.setExc(new AECException());
+			broadcastInfo(i);
+		}
 
-		getAECGym();
 	}
 
 	private void login() throws LoginFailedException, RemoteServerException,
@@ -92,7 +98,7 @@ public class PokeGoHelper implements Runnable {
 		sc.close();
 
 		provider.login(access);
-		
+
 		saveToken(provider.getRefreshToken());
 		isAuthenticated = true;
 		poGo = new PokemonGo(provider, httpClient);
@@ -108,32 +114,47 @@ public class PokeGoHelper implements Runnable {
 		}
 	}
 
-	private void getAECGym() {
+	public void registerListener(AECInfoListener i) {
+		listener = i;
+	}
+
+	void broadcastInfo(AECInfo info) {
+		if (listener != null)
+			listener.AECInfoUpdated(info);
+	}
+
+	private AECInfo getInfoFromGym(Gym gym) throws LoginFailedException,
+			RemoteServerException, InterruptedException {
+		AECInfo info = new AECInfo();
+		info.setInBattle(gym.getIsInBattle());
+		Thread.sleep(10);
+		info.setTeamColor(gym.getOwnedByTeam().toString());
+		Thread.sleep(10);
+		info.setGymLevel(gym.getGymMembers().size());
+		return info;
+	}
+
+	private void getAECGym() throws LoginFailedException,
+			RemoteServerException, InterruptedException {
+
 		if (poGo != null) {
 			poGo.setLocation(48.3097431, 14.2821328, 0);
-			try {
-				List<Gym> gyms = poGo.getMap().getGyms();
-				for (Gym gym : gyms) {
-					if (gym.getName().equals(gymNameAEC)) {
 
-						AECInfo info = new AECInfo();
-						info.setInBattle(gym.getIsInBattle());
-						info.setTeamColor(gym.getOwnedByTeam().toString());
-						info.setGymLevel(gym.getGymMembers().size());
+			List<Gym> gyms = poGo.getMap().getGyms();
+			aec = gyms.get(18);
+			if (!aec.getName().equals(gymNameAEC)) {
+				for (int i = 0; i < gyms.size(); i++) {
+					Gym gym = gyms.get(i);
+					String name = gym.getName();
 
-						if (listener != null)
-							listener.AECInfoUpdated(info);
-
+					if (name.equals(gymNameAEC)) {
+						aec = gym;
 						break;
 					}
+					Thread.sleep(500);
 				}
-			} catch (LoginFailedException | RemoteServerException e) {
-				e.printStackTrace();
 			}
 		}
 	}
 
-	public static void registerListener(AECInfoListener i) {
-		listener = i;
-	}
 }

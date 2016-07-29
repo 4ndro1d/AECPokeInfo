@@ -5,7 +5,14 @@ public class AECInfo {
 	private boolean isInBattle;
 	private String teamColor;
 	private int gymLevel;
+	private AECException exc;
 	
+	public AECException getExc() {
+		return exc;
+	}
+	public void setExc(AECException exc) {
+		this.exc = exc;
+	}
 	public int getGymLevel() {
 		return gymLevel;
 	}
