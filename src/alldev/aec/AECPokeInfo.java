@@ -89,17 +89,18 @@ public class AECPokeInfo {
 		sc.close();
 
 		provider.login(access);
-		
+
 		saveToken(provider.getRefreshToken());
 		isAuthenticated = true;
-		
+
 		poGo = new PokemonGo(provider, httpClient);
 	}
 
-	private void loginPokeGo() throws LoginFailedException, RemoteServerException {
-			poGo = new PokemonGo(new GoogleUserCredentialProvider(httpClient,
-					refreshToken), httpClient);
-			isAuthenticated = true;
+	private void loginPokeGo() throws LoginFailedException,
+			RemoteServerException {
+		poGo = new PokemonGo(new GoogleUserCredentialProvider(httpClient,
+				refreshToken), httpClient);
+		isAuthenticated = true;
 
 	}
 
@@ -110,7 +111,8 @@ public class AECPokeInfo {
 			poGo.setLocation(48.3097431, 14.2821328, 0);
 
 			List<Gym> gyms = poGo.getMap().getGyms();
-			aec = gyms.get(18);
+			if (gyms.size() > 18)
+				aec = gyms.get(18);
 			if (!aec.getName().equals(gymNameAEC)) {
 				for (int i = 0; i < gyms.size(); i++) {
 					Gym gym = gyms.get(i);
