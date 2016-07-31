@@ -37,8 +37,7 @@ public class AECPokeInfo {
 				getAECGym();
 				if (aec != null)
 					broadcastInfo(getInfoFromGym(aec));
-			} catch (LoginFailedException | RemoteServerException | IOException
-					| InterruptedException e) {
+			} catch (Exception e) {
 				AECInfo i = new AECInfo();
 				i.setExc(new AECException());
 				broadcastInfo(i);
