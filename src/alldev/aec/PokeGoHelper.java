@@ -128,7 +128,7 @@ public class PokeGoHelper implements Runnable {
 		AECInfo info = new AECInfo();
 		info.setInBattle(gym.getIsInBattle());
 		Thread.sleep(10);
-		info.setTeamColor(gym.getOwnedByTeam().toString());
+	//	info.setTeamColor(gym.getOwnedByTeam().toString());
 		Thread.sleep(10);
 		info.setGymLevel(gym.getGymMembers().size());
 		return info;

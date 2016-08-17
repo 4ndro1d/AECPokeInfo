@@ -19,8 +19,7 @@ public class AECPokeInfo {
 
 	private OkHttpClient httpClient = new OkHttpClient();
 	private String refreshToken;
-	private Path path = FileSystems.getDefault()
-			.getPath("", "refreshToken.txt");
+	private Path path = FileSystems.getDefault().getPath("", "refreshToken.txt");
 
 	private PokemonGo poGo;
 	private boolean isAuthenticated = false;
@@ -32,26 +31,27 @@ public class AECPokeInfo {
 	public void startRoutine() {
 		while (true) {
 			try {
-				if (!isAuthenticated)
+				if (!isAuthenticated) {
 					login();
+				}
 				getAECGym();
 				if (aec != null)
 					broadcastInfo(getInfoFromGym(aec));
 			} catch (Exception e) {
+				e.printStackTrace();
 				AECInfo i = new AECInfo();
 				i.setExc(new AECException());
 				broadcastInfo(i);
 			}
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public void login() throws LoginFailedException, RemoteServerException,
-			IOException {
+	public void login() throws LoginFailedException, RemoteServerException, IOException {
 		try {
 			if (path.toFile().exists())
 				readToken();
@@ -74,13 +74,10 @@ public class AECPokeInfo {
 		Files.write(path, token.getBytes());
 	}
 
-	private void loginPokeGoFirstTime() throws LoginFailedException,
-			RemoteServerException, IOException {
-		GoogleUserCredentialProvider provider = new GoogleUserCredentialProvider(
-				httpClient);
+	private void loginPokeGoFirstTime() throws LoginFailedException, RemoteServerException, IOException {
+		GoogleUserCredentialProvider provider = new GoogleUserCredentialProvider(httpClient);
 
-		System.out.println("Please go to "
-				+ GoogleUserCredentialProvider.LOGIN_URL);
+		System.out.println("Please go to " + GoogleUserCredentialProvider.LOGIN_URL);
 		System.out.println("Enter authorisation code:");
 
 		Scanner sc = new Scanner(System.in);
@@ -95,24 +92,20 @@ public class AECPokeInfo {
 		poGo = new PokemonGo(provider, httpClient);
 	}
 
-	private void loginPokeGo() throws LoginFailedException,
-			RemoteServerException {
-		poGo = new PokemonGo(new GoogleUserCredentialProvider(httpClient,
-				refreshToken), httpClient);
+	private void loginPokeGo() throws LoginFailedException, RemoteServerException {
+		poGo = new PokemonGo(new GoogleUserCredentialProvider(httpClient, refreshToken), httpClient);
 		isAuthenticated = true;
 
 	}
 
-	private void getAECGym() throws LoginFailedException,
-			RemoteServerException, InterruptedException {
+	private void getAECGym() throws LoginFailedException, RemoteServerException, InterruptedException {
 
 		if (poGo != null) {
 			poGo.setLocation(48.3097431, 14.2821328, 0);
-
 			List<Gym> gyms = poGo.getMap().getGyms();
-			if (gyms.size() > 18)
-				aec = gyms.get(18);
-			if (!aec.getName().equals(gymNameAEC)) {
+			if (gyms.size() > 0)
+				aec = gyms.get(0);
+			if (aec != null && !aec.getName().equals(gymNameAEC)) {
 				for (int i = 0; i < gyms.size(); i++) {
 					Gym gym = gyms.get(i);
 					String name = gym.getName();
@@ -122,7 +115,7 @@ public class AECPokeInfo {
 						break;
 					}
 
-					Thread.sleep(500);
+					Thread.sleep(10000);
 				}
 			}
 		}
@@ -137,8 +130,7 @@ public class AECPokeInfo {
 			listener.AECInfoUpdated(info);
 	}
 
-	private AECInfo getInfoFromGym(Gym gym) throws LoginFailedException,
-			RemoteServerException, InterruptedException {
+	private AECInfo getInfoFromGym(Gym gym) throws LoginFailedException, RemoteServerException, InterruptedException {
 		AECInfo info = new AECInfo();
 		info.setInBattle(gym.getIsInBattle());
 		Thread.sleep(10);
