@@ -101,13 +101,15 @@ public class PokeGoHelper implements Runnable {
 
 		saveToken(provider.getRefreshToken());
 		isAuthenticated = true;
-		poGo = new PokemonGo(provider, httpClient);
+		poGo = new PokemonGo(httpClient);
+		poGo.login(provider);
 	}
 
 	private void loginPokeGo() {
 		try {
-			poGo = new PokemonGo(new GoogleUserCredentialProvider(httpClient,
-					refreshToken), httpClient);
+			poGo = new PokemonGo(httpClient);
+			poGo.login(new GoogleUserCredentialProvider(httpClient,
+					refreshToken));
 			isAuthenticated = true;
 		} catch (LoginFailedException | RemoteServerException e) {
 			e.printStackTrace();

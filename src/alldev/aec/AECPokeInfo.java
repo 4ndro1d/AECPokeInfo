@@ -12,11 +12,15 @@ import okhttp3.OkHttpClient;
 import com.pokegoapi.api.PokemonGo;
 import com.pokegoapi.api.gym.Gym;
 import com.pokegoapi.auth.GoogleUserCredentialProvider;
+import com.pokegoapi.auth.PtcCredentialProvider;
 import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
 
 public class AECPokeInfo {
-
+	
+	private String mail = "g2113864@mvrht.com";
+	private String username = "pokefacade";
+	private String password = "p4ssw0rd5";
 	private OkHttpClient httpClient = new OkHttpClient();
 	private String refreshToken;
 	private Path path = FileSystems.getDefault().getPath("", "refreshToken.txt");
@@ -52,18 +56,19 @@ public class AECPokeInfo {
 	}
 
 	public void login() throws LoginFailedException, RemoteServerException, IOException {
-		try {
-			if (path.toFile().exists())
-				readToken();
-		} catch (ClassNotFoundException | IOException e) {
-			e.printStackTrace();
-		}
-
-		if (refreshToken == null) {
-			loginPokeGoFirstTime();
-		} else {
+//		try {
+//			if (path.toFile().exists())
+//				readToken();
+//		} catch (ClassNotFoundException | IOException e) {
+//			e.printStackTrace();
+//		}
+//
+//		if (refreshToken == null) {
+//			loginPokeGoFirstTime();
+//		} else {
+//			loginPokeGo();
+//		}
 			loginPokeGo();
-		}
 	}
 
 	private void readToken() throws IOException, ClassNotFoundException {
@@ -89,11 +94,16 @@ public class AECPokeInfo {
 		saveToken(provider.getRefreshToken());
 		isAuthenticated = true;
 
-		poGo = new PokemonGo(provider, httpClient);
+		poGo = new PokemonGo(httpClient);
+		poGo.login(provider);
 	}
 
 	private void loginPokeGo() throws LoginFailedException, RemoteServerException {
-		poGo = new PokemonGo(new GoogleUserCredentialProvider(httpClient, refreshToken), httpClient);
+//		poGo = new PokemonGo(httpClient);
+//		poGo.login(new GoogleUserCredentialProvider(httpClient,
+//				refreshToken));
+		poGo = new PokemonGo(httpClient);
+		poGo.login(new PtcCredentialProvider(httpClient, username, password));
 		isAuthenticated = true;
 
 	}
